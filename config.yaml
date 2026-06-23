@@ -1,0 +1,419 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# config.yaml – Monitor de Empleo · Javier Íñiguez
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# CÓMO EDITAR ESTE ARCHIVO
+# ─────────────────────────
+# • Para añadir una fuente:   copia un bloque existente, cambia los valores.
+# • Para desactivar una:      pon "activo: false" (sin borrarla).
+# • Para añadir palabras clave: añádelas a la lista correspondiente.
+# • Los # al inicio de línea son comentarios — el script los ignora.
+#
+# IMPORTANTE: respetar la indentación con espacios (no tabuladores).
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+# ── PALABRAS CLAVE ────────────────────────────────────────────────────────────
+# Periodismo = prioridad absoluta. Se muestra primero en el HTML.
+# Comunicación = segunda opción.
+
+keywords:
+
+  periodismo:
+    - journalist
+    - reporter
+    - redactor
+    - redactora
+    - corresponsal
+    - correspondant
+    - news producer
+    - web producer
+    - editor
+    - periodista
+    - anchor
+    - presenter
+    - foreign correspondent
+    - news editor
+    - digital editor
+    - multimedia journalist
+    - investigative journalist
+    - political reporter
+    - news writer
+    - staff writer
+    - content producer
+
+  comunicacion:
+    - communications officer
+    - communications manager
+    - communications specialist
+    - communications associate
+    - communications coordinator
+    - press officer
+    - press and communications
+    - public affairs officer
+    - public affairs specialist
+    - media officer
+    - information officer
+    - oficial de prensa
+    - oficial de comunicación
+    - responsable de comunicación
+    - técnico de comunicación
+    - media relations
+
+
+# ── EXCLUSIONES ───────────────────────────────────────────────────────────────
+# Ofertas con estas palabras se descartan automáticamente.
+
+exclusiones:
+
+  # Sin becas, prácticas ni programas de formación
+  - intern
+  - internship
+  - trainee
+  - traineeship
+  - "prácticas"
+  - becario
+  - becaria
+  - fellowship
+  - student
+  - "graduate programme"
+  - "graduate program"
+
+  # Medios de ideología ultraderechista
+  - okdiario
+  - "libertad digital"
+  - "epoch times"
+  - breitbart
+  - "daily wire"
+  - "gateway pundit"
+  # Nota: "vox" está excluido de la lista porque colisiona con VOA (Voice of America).
+  # Se revisará manualmente si aparece algo de Vox el partido.
+
+
+# ── FUENTES ───────────────────────────────────────────────────────────────────
+# Organizadas por categoría. El orden aquí no afecta al HTML (Periodismo
+# siempre va primero por las palabras clave, no por el orden de fuentes).
+
+sources:
+
+  # ── Agregadores generales (los más fiables) ───────────────────────────────
+  agregadores:
+
+    - name: "GIJN Jobs"
+      type: rss
+      feed: "https://gijn.org/jobs/feed/"
+      url: "https://gijn.org/jobs/"
+      activo: true
+
+    - name: "GFMD Careers"
+      type: rss
+      feed: "https://gfmd.info/careers/feed/"
+      url: "https://gfmd.info/careers/"
+      activo: true
+
+    - name: "UNjobs – Journalism"
+      type: unjobs
+      url: "https://unjobs.org/themes/journalism"
+      activo: true
+
+    - name: "UNjobs – Communications"
+      type: unjobs
+      url: "https://unjobs.org/themes/communications"
+      activo: true
+
+    - name: "Impactpool"
+      type: impactpool
+      url: "https://www.impactpool.org/search?q=journalist+reporter+communications"
+      activo: true
+
+
+  # ── ONG y libertad de prensa ──────────────────────────────────────────────
+  ong_medios:
+
+    - name: "CPJ"
+      type: html
+      url: "https://cpj.org/about/jobs/"
+      activo: true
+      selectors:
+        item: "article, .job-listing, li"
+        title: "h2 a, h3 a, a"
+
+    - name: "ICFJ"
+      type: html
+      url: "https://www.icfj.org/about/jobs-icfj"
+      activo: true
+      selectors:
+        item: "article, .views-row, li"
+        title: "h2 a, h3 a, .field-title a, a"
+
+    - name: "Free Press Unlimited"
+      type: html
+      url: "https://www.freepressunlimited.org/en/about-us/vacancies"
+      activo: true
+      selectors:
+        item: "article, li, .job"
+        title: "h2 a, h3 a, a"
+
+    - name: "IMS (International Media Support)"
+      type: html
+      url: "https://www.mediasupport.org/about/vacancies/"
+      activo: true
+      selectors:
+        item: "article, li, .job"
+        title: "h2 a, h3 a, a"
+
+    - name: "Amnistía Internacional"
+      type: html
+      url: "https://www.amnesty.org/en/about-us/jobs/"
+      activo: true
+      selectors:
+        item: "article, li, .job"
+        title: "h2 a, h3 a, a"
+
+
+  # ── Agencias internacionales ──────────────────────────────────────────────
+  agencias:
+
+    - name: "Agencia EFE"
+      type: html
+      url: "https://piloota.com/es/empresa/efe/"
+      base_url: "https://piloota.com"
+      activo: true
+      selectors:
+        item: ".job-card, article, li"
+        title: "h2 a, h3 a, a.job-title, a"
+
+    - name: "AFP"
+      type: html
+      url: "https://www.afp.com/en/agency/careers"
+      activo: true
+      selectors:
+        item: "article, .job-item, li"
+        title: "h2 a, h3 a, a"
+
+    - name: "Associated Press (AP)"
+      type: html
+      url: "https://careers.ap.org/search?q=journalist+reporter"
+      activo: true
+      selectors:
+        item: ".job-listing, article, li"
+        title: "h2 a, h3 a, a"
+
+
+  # ── Televisiones y multimedia ─────────────────────────────────────────────
+  television:
+
+    - name: "BBC Careers"
+      type: html
+      url: "https://careers.bbc.co.uk/search?q=journalist&category=journalism"
+      activo: true
+      selectors:
+        item: "article, li[class*='job'], .job"
+        title: "h2 a, h3 a, a[class*='title']"
+
+    - name: "Deutsche Welle"
+      type: html
+      url: "https://corporate.dw.com/en/working-at-dw/s-107504"
+      activo: true
+      selectors:
+        item: "article, li, .teaser"
+        title: "h2 a, h3 a, a"
+
+    - name: "Al Jazeera"
+      type: html
+      url: "https://network.aljazeera.net/jobs"
+      activo: true
+      selectors:
+        item: "article, .job, li"
+        title: "h2 a, h3 a, a"
+
+    - name: "Euronews"
+      type: html
+      url: "https://jobs.euronews.com/en/our-offers"
+      activo: true
+      selectors:
+        item: ".job-offer, article, li"
+        title: "h2 a, h3 a, a.offer-title, a"
+
+    - name: "France 24"
+      type: html
+      url: "https://www.france24.com/en/tv-shows/france-24-jobs/"
+      activo: true
+      selectors:
+        item: "article, li, .job"
+        title: "h2 a, h3 a, a"
+
+    - name: "TelevisaUnivision"
+      type: html
+      url: "https://careers.televisaunivision.com/search?keywords=journalist"
+      activo: true
+      selectors:
+        item: "article, li, .job-listing"
+        title: "h2 a, h3 a, a"
+
+    - name: "NBCUniversal"
+      type: html
+      url: "https://www.nbcunicareers.com/search?query=journalist+reporter"
+      activo: true
+      selectors:
+        item: "article, li, .job-listing"
+        title: "h2 a, h3 a, a[class*='title']"
+
+
+  # ── Medios europeos / política ────────────────────────────────────────────
+  europeos:
+
+    - name: "Euractiv"
+      type: html
+      url: "https://www.euractiv.com/section/about/job-openings/"
+      activo: true
+      selectors:
+        item: "article, .job, li"
+        title: "h2 a, h3 a, a"
+
+    - name: "Politico Europe"
+      type: html
+      url: "https://www.politico.eu/jobs/"
+      activo: true
+      selectors:
+        item: "article, .job-item, li"
+        title: "h2 a, h3 a, a"
+
+    - name: "Europe MediaLab"
+      type: html
+      url: "https://europemedialab.com/about/jobs/"
+      activo: true
+      selectors:
+        item: "article, li, .job"
+        title: "h2 a, h3 a, a"
+
+
+  # ── Medios españoles ──────────────────────────────────────────────────────
+  espanoles:
+
+    - name: "El País"
+      type: html
+      url: "https://elpais.com/empleos/"
+      activo: true
+      selectors:
+        item: "article, li, .job"
+        title: "h2 a, h3 a, a"
+
+    - name: "El Confidencial"
+      type: html
+      url: "https://www.elconfidencial.com/trabajar-en-el-confidencial/"
+      activo: true
+      selectors:
+        item: "article, li, .job"
+        title: "h2 a, h3 a, a"
+
+    - name: "RTVE"
+      type: html
+      url: "https://www.rtve.es/rtve/empleo/"
+      activo: true
+      selectors:
+        item: "article, li, .convocatoria"
+        title: "h2 a, h3 a, a"
+
+    - name: "Europa Press"
+      type: html
+      url: "https://www.europapress.es/portalempresa/"
+      activo: true
+      selectors:
+        item: "article, li"
+        title: "h2 a, h3 a, a"
+
+    - name: "elDiario.es"
+      type: html
+      url: "https://www.eldiario.es/trabaja-con-nosotros/"
+      activo: true
+      selectors:
+        item: "article, li, .job"
+        title: "h2 a, h3 a, a"
+
+    - name: "La Vanguardia"
+      type: html
+      url: "https://www.lavanguardia.com/empleos/"
+      activo: true
+      selectors:
+        item: "article, li"
+        title: "h2 a, h3 a, a"
+
+
+  # ── Embajadas e instituciones ─────────────────────────────────────────────
+  embajadas:
+
+    - name: "FCDO (Embajada Británica)"
+      type: html
+      url: "https://fcdo.tal.net/vx/lang-en-gb/mobile-0/appcentre-1/brand-2/candidate/jobboard/event/1"
+      activo: true
+      selectors:
+        item: "tr[class*='job'], .job-row, li, article"
+        title: "a[class*='title'], td a, a"
+
+    - name: "EEAS (Delegaciones UE)"
+      type: html
+      url: "https://www.eeas.europa.eu/eeas/vacantes_es"
+      activo: true
+      selectors:
+        item: "article, li, .ecl-content-item"
+        title: "h2 a, h3 a, a"
+
+
+  # ── Think-tanks / política ────────────────────────────────────────────────
+  think_tanks:
+
+    - name: "ECFR"
+      type: html
+      url: "https://ecfr.eu/jobs/"
+      activo: true
+      selectors:
+        item: "article, li, .job"
+        title: "h2 a, h3 a, a"
+
+    - name: "Friends of Europe"
+      type: html
+      url: "https://www.friendsofeurope.org/about/careers/"
+      activo: true
+      selectors:
+        item: "article, li, .job"
+        title: "h2 a, h3 a, a"
+
+    - name: "Instituto Real Elcano"
+      type: html
+      url: "https://www.realinstitutoelcano.org/sobre-nosotros/trabaja-con-nosotros/"
+      activo: true
+      selectors:
+        item: "article, li, .job"
+        title: "h2 a, h3 a, a"
+
+    - name: "European Policy Centre"
+      type: html
+      url: "https://www.epc.eu/en/Jobs.html"
+      activo: true
+      selectors:
+        item: "article, li, .job"
+        title: "h2 a, h3 a, a"
+
+
+# ── REVISAR MANUALMENTE ───────────────────────────────────────────────────────
+# Estas fuentes aparecen como links en el HTML pero NO se monitorizan
+# automáticamente (muros de pago, JavaScript obligatorio o API de pago).
+
+revisar_manualmente:
+  - nombre: "Bloomberg Careers"
+    url: "https://bloomberg.avature.net/careers"
+  - nombre: "Financial Times Jobs"
+    url: "https://aboutus.ft.com/careers"
+  - nombre: "Reuters (LinkedIn)"
+    url: "https://www.linkedin.com/company/thomson-reuters/jobs/"
+  - nombre: "New York Times"
+    url: "https://www.nytco.com/careers/"
+  - nombre: "Washington Post"
+    url: "https://www.washingtonpost.com/careers/"
+  - nombre: "Japan Times"
+    url: "https://www.japantimes.co.jp/about-us/career/"
+  - nombre: "Warner Bros. Discovery"
+    url: "https://jobs.wbd.com"
+  - nombre: "US Embassy – ERA Jobs"
+    url: "https://erajobs.state.gov/dos-era/vacancysearch/searchVacancies.hms"
