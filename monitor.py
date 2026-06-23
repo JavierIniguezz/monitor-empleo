@@ -15,7 +15,6 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import hashlib
 import re
-import sys
 
 # ── CONFIGURACIÓN ─────────────────────────────────────────────────────────────
 
@@ -26,35 +25,34 @@ def load_config(path="config.yaml"):
 # ── FILTROS ───────────────────────────────────────────────────────────────────
 
 def matches(text, keywords):
-    """True si el texto contiene alguna de las palabras clave."""
     t = text.lower()
     return any(kw.lower() in t for kw in keywords)
 
 def excluded(text, terms):
-    """True si el texto contiene algún término a excluir."""
     t = text.lower()
     return any(ex.lower() in t for ex in terms)
 
 def categorize(text, config):
-    """
-    Clasifica como 'Periodismo' o 'Comunicación'.
-    Periodismo tiene prioridad absoluta.
-    Devuelve None si no encaja con ninguna categoría.
-    """
+    """Periodismo tiene prioridad absoluta sobre Comunicación."""
     if matches(text, config["keywords"]["periodismo"]):
         return "Periodismo"
     if matches(text, config["keywords"]["comunicacion"]):
         return "Comunicación"
     return None
 
-def make_id(title, company):
-    """ID único para deduplicar ofertas que aparecen en varias fuentes."""
-    key = re.sub(r'\W+', '', (title + company).lower())
+def make_id(title):
+    """
+    ID único basado solo en el título (normalizado).
+    Usamos solo el título — no la empresa — porque el mismo puesto
+    puede aparecer en varias secciones de UNjobs con distintos nombres
+    de fuente, y queremos eliminarlo como duplicado.
+    """
+    key = re.sub(r'\W+', '', title.lower())
     return hashlib.md5(key.encode()).hexdigest()[:8]
 
 def make_job(title, empresa, link, resumen, categoria, fuente, fecha=""):
     return {
-        "id":        make_id(title, empresa),
+        "id":        make_id(title),
         "titulo":    title,
         "empresa":   empresa,
         "link":      link,
@@ -76,9 +74,8 @@ HEADERS = {
 
 def scrape_rss(source, config):
     """
-    Lee un feed RSS/Atom. Funciona con GIJN, GFMD y sitios WordPress.
-    Es el método más fiable porque los feeds están diseñados para ser leídos
-    por máquinas, a diferencia de las páginas web.
+    Lee un feed RSS/Atom. El más fiable — los feeds están diseñados
+    para ser leídos por máquinas.
     """
     jobs = []
     try:
@@ -103,13 +100,12 @@ def scrape_rss(source, config):
 
 
 def scrape_unjobs(source, config):
-    """Scraper específico para unjobs.org — estructura bien definida."""
+    """Scraper específico para unjobs.org."""
     jobs = []
     try:
         r = requests.get(source["url"], headers=HEADERS, timeout=20)
         soup = BeautifulSoup(r.text, "html.parser")
 
-        # UNjobs usa distintos selectores según la sección
         for item in soup.select("article, .job, .vacancy, li.job-item, div[class*='vacancy']")[:40]:
             a = item.select_one("a[href]")
             if not a: continue
@@ -126,12 +122,12 @@ def scrape_unjobs(source, config):
 
             if excluded(full, config["exclusiones"]): continue
             cat = categorize(full, config)
-            if not cat: cat = "Comunicación"  # UNjobs suele publicar puestos de comunicación/ONU
+            if not cat: cat = "Comunicación"
 
             jobs.append(make_job(title, empresa or source["name"], link, "", cat, source["name"]))
 
     except Exception as e:
-        print(f"    ⚠ UNjobs error: {e}")
+        print(f"    ⚠ UNjobs error ({source['name']}): {e}")
     return jobs
 
 
@@ -169,9 +165,9 @@ def scrape_impactpool(source, config):
 
 def scrape_html(source, config):
     """
-    Scraper HTML genérico. Usa los selectores CSS definidos en config.yaml
-    para cada fuente. Si los selectores fallan (porque la web ha cambiado
-    su estructura), el script no se rompe — simplemente devuelve 0 resultados.
+    Scraper HTML genérico. Usa los selectores CSS definidos en config.yaml.
+    Si los selectores fallan (la web cambió su estructura), devuelve 0
+    resultados sin romper el script.
     """
     jobs = []
     try:
@@ -179,35 +175,31 @@ def scrape_html(source, config):
         soup = BeautifulSoup(r.text, "html.parser")
         sel  = source.get("selectors", {})
 
-        # Selector de contenedor (cada oferta)
         item_sel = sel.get("item", "article, li, .job, .vacancy, .opening, [class*='job-item']")
         items    = soup.select(item_sel)
 
         for item in items[:30]:
-            # Título y link
             title_sel = sel.get("title", "h2 a, h3 a, h4 a, a[class*='title'], a")
             title_el  = item.select_one(title_sel)
             if not title_el: continue
 
             title = title_el.get_text(strip=True)
-            if len(title) < 8: continue  # evita basura
+            if len(title) < 8: continue
 
             link = title_el.get("href", "")
             if not link:
                 link_el = item.select_one("a[href]")
                 link    = link_el["href"] if link_el else ""
 
-            # Construir URL absoluta si es relativa
             base = source.get("base_url", "")
             if link and not link.startswith("http") and base:
                 link = base.rstrip("/") + "/" + link.lstrip("/")
 
-            # Descripción breve
             desc_sel = sel.get("desc", "p, .description, .summary, .excerpt")
             desc_el  = item.select_one(desc_sel)
             desc     = desc_el.get_text(strip=True)[:220] if desc_el else ""
+            full     = f"{title} {desc} {source['name']}"
 
-            full = f"{title} {desc} {source['name']}"
             if excluded(full, config["exclusiones"]): continue
             cat = categorize(full, config)
             if not cat: continue
@@ -244,7 +236,7 @@ def fetch_all(config):
             scraper = SCRAPERS.get(source.get("type", "html"), scrape_html)
             jobs    = scraper(source, config)
 
-            # Deduplicar: misma oferta puede aparecer en varios agregadores
+            # Deduplicar por ID de título
             nuevos = [j for j in jobs if j["id"] not in seen_ids]
             seen_ids.update(j["id"] for j in nuevos)
             all_jobs.extend(nuevos)
@@ -320,58 +312,47 @@ def generate_html(jobs, config):
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Monitor de Empleo · Javier Íñiguez</title>
   <style>
-    * {{ box-sizing:border-box; margin:0; padding:0 }}
-    body {{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-            background:#f1f5f9; color:#0f172a; line-height:1.5 }}
-
-    /* ── Cabecera ── */
-    header.main {{ background:#0f172a; color:#fff; padding:24px 28px }}
-    header.main h1 {{ font-size:19px; font-weight:800; letter-spacing:-.02em }}
-    header.main p {{ color:#64748b; font-size:12px; margin-top:4px }}
-    .stats {{ display:flex; gap:12px; margin-top:16px; flex-wrap:wrap }}
-    .stat {{ background:rgba(255,255,255,.07); border-radius:8px; padding:8px 16px; text-align:center }}
-    .stat b {{ display:block; font-size:22px; font-weight:800 }}
-    .stat small {{ font-size:10px; color:#94a3b8; font-weight:600; text-transform:uppercase }}
-
-    /* ── Grupos ── */
-    main {{ max-width:820px; margin:0 auto; padding:22px 16px }}
-    .group {{ margin-bottom:28px; border-radius:10px; overflow:hidden;
-              box-shadow:0 1px 3px rgba(0,0,0,.07) }}
-    .group-head {{ display:flex; justify-content:space-between; align-items:center;
-                   padding:11px 16px; background:#fff;
-                   border-left:4px solid; font-size:11px; font-weight:800;
-                   text-transform:uppercase; letter-spacing:.08em }}
-    .badge {{ background:#e2e8f0; border-radius:10px; padding:2px 10px;
-              font-size:11px; font-weight:700 }}
-
-    /* ── Cards ── */
-    .card {{ background:#fff; padding:14px 16px; border-bottom:1px solid #f1f5f9 }}
-    .card:last-child {{ border-bottom:none }}
-    .card-top {{ display:flex; justify-content:space-between; margin-bottom:3px }}
-    .company {{ font-weight:700; font-size:12px }}
-    .meta {{ font-size:11px; color:#94a3b8 }}
-    .job-link {{ display:block; font-size:14px; font-weight:600;
-                 color:#1d4ed8; text-decoration:none; margin-bottom:4px }}
-    .job-link:hover {{ text-decoration:underline }}
-    .desc {{ font-size:12px; color:#64748b; line-height:1.55 }}
-
-    /* ── Manual ── */
-    .manual-body {{ background:#fff; padding:14px 16px }}
-    .manual-body p {{ font-size:12px; color:#64748b; margin-bottom:10px }}
-    .manual-body ul {{ list-style:none; display:flex; flex-wrap:wrap; gap:8px }}
-    .manual-body a {{ font-size:12px; color:#1d4ed8; background:#eff6ff;
-                      padding:5px 12px; border-radius:20px; text-decoration:none;
-                      font-weight:600 }}
-    .manual-body a:hover {{ background:#dbeafe }}
-
-    /* ── Misc ── */
-    .empty {{ text-align:center; padding:48px; color:#94a3b8; font-size:13px }}
-    footer {{ text-align:center; padding:20px; color:#94a3b8; font-size:11px }}
-    footer a {{ color:#94a3b8 }}
+    *{{box-sizing:border-box;margin:0;padding:0}}
+    body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+          background:#f1f5f9;color:#0f172a;line-height:1.5}}
+    header.main{{background:#0f172a;color:#fff;padding:24px 28px}}
+    header.main h1{{font-size:19px;font-weight:800;letter-spacing:-.02em}}
+    header.main p{{color:#64748b;font-size:12px;margin-top:4px}}
+    .stats{{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}}
+    .stat{{background:rgba(255,255,255,.07);border-radius:8px;padding:8px 16px;text-align:center}}
+    .stat b{{display:block;font-size:22px;font-weight:800}}
+    .stat small{{font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase}}
+    main{{max-width:820px;margin:0 auto;padding:22px 16px}}
+    .group{{margin-bottom:28px;border-radius:10px;overflow:hidden;
+            box-shadow:0 1px 3px rgba(0,0,0,.07)}}
+    .group-head{{display:flex;justify-content:space-between;align-items:center;
+                 padding:11px 16px;background:#fff;
+                 border-left:4px solid;font-size:11px;font-weight:800;
+                 text-transform:uppercase;letter-spacing:.08em}}
+    .badge{{background:#e2e8f0;border-radius:10px;padding:2px 10px;
+            font-size:11px;font-weight:700}}
+    .card{{background:#fff;padding:14px 16px;border-bottom:1px solid #f1f5f9}}
+    .card:last-child{{border-bottom:none}}
+    .card-top{{display:flex;justify-content:space-between;margin-bottom:3px}}
+    .company{{font-weight:700;font-size:12px}}
+    .meta{{font-size:11px;color:#94a3b8}}
+    .job-link{{display:block;font-size:14px;font-weight:600;
+               color:#1d4ed8;text-decoration:none;margin-bottom:4px}}
+    .job-link:hover{{text-decoration:underline}}
+    .desc{{font-size:12px;color:#64748b;line-height:1.55}}
+    .manual-body{{background:#fff;padding:14px 16px}}
+    .manual-body p{{font-size:12px;color:#64748b;margin-bottom:10px}}
+    .manual-body ul{{list-style:none;display:flex;flex-wrap:wrap;gap:8px}}
+    .manual-body a{{font-size:12px;color:#1d4ed8;background:#eff6ff;
+                    padding:5px 12px;border-radius:20px;text-decoration:none;
+                    font-weight:600}}
+    .manual-body a:hover{{background:#dbeafe}}
+    .empty{{text-align:center;padding:48px;color:#94a3b8;font-size:13px}}
+    footer{{text-align:center;padding:20px;color:#94a3b8;font-size:11px}}
+    footer a{{color:#94a3b8}}
   </style>
 </head>
 <body>
-
 <header class="main">
   <h1>🌍 Monitor de Empleo · Javier Íñiguez</h1>
   <p>Actualizado: {now}</p>
@@ -382,19 +363,16 @@ def generate_html(jobs, config):
     <div class="stat"><b style="color:#fbbf24">{len(manuales)}</b><small>Manual</small></div>
   </div>
 </header>
-
 <main>
   {empty_html}
   {section("📰", "Periodismo", periodismo, "#2563eb")}
   {section("📢", "Comunicación", comms, "#7c3aed")}
   {manual_html}
 </main>
-
 <footer>
   Fuentes: {fuentes_usadas} ·
   <a href="https://github.com/JavierIniguezz/monitor-empleo">Ver código en GitHub</a>
 </footer>
-
 </body>
 </html>"""
 

@@ -4,8 +4,8 @@
 #
 # CÓMO EDITAR ESTE ARCHIVO
 # ─────────────────────────
-# • Para añadir una fuente:   copia un bloque existente, cambia los valores.
-# • Para desactivar una:      pon "activo: false" (sin borrarla).
+# • Para añadir una fuente:    copia un bloque existente, cambia los valores.
+# • Para desactivar una:       pon "activo: false" (sin borrarla).
 # • Para añadir palabras clave: añádelas a la lista correspondiente.
 # • Los # al inicio de línea son comentarios — el script los ignora.
 #
@@ -79,6 +79,25 @@ exclusiones:
   - "graduate programme"
   - "graduate program"
 
+  # Contenido que no es una oferta de empleo
+  - " award"          # premios (ej: "Journalist of the Year Award")
+  - "annual award"
+  - "year award"
+  - "talent pool"     # bolsas de freelancers, no empleos reales
+  - "risk assessment" # consultoría, no periodismo
+
+  # Perfiles claramente irrelevantes
+  - "go-to-market"
+  - "user insights"
+  - "production coordinator"  # coordinadores de revistas académicas
+  - "market lead"
+  - "product manager"
+  - "software engineer"
+  - "data analyst"
+  - "finance officer"
+  - "accountant"
+  - "human resources"
+
   # Medios de ideología ultraderechista
   - okdiario
   - "libertad digital"
@@ -86,17 +105,13 @@ exclusiones:
   - breitbart
   - "daily wire"
   - "gateway pundit"
-  # Nota: "vox" está excluido de la lista porque colisiona con VOA (Voice of America).
-  # Se revisará manualmente si aparece algo de Vox el partido.
 
 
 # ── FUENTES ───────────────────────────────────────────────────────────────────
-# Organizadas por categoría. El orden aquí no afecta al HTML (Periodismo
-# siempre va primero por las palabras clave, no por el orden de fuentes).
 
 sources:
 
-  # ── Agregadores generales (los más fiables) ───────────────────────────────
+  # ── Agregadores (los más fiables) ─────────────────────────────────────────
   agregadores:
 
     - name: "GIJN Jobs"
@@ -224,8 +239,8 @@ sources:
       url: "https://network.aljazeera.net/jobs"
       activo: true
       selectors:
-        item: "article, .job, li"
-        title: "h2 a, h3 a, a"
+        item: "article, .job, li.job-listing"
+        title: "h2 a, h3 a, a.job-title"
 
     - name: "Euronews"
       type: html
@@ -397,8 +412,7 @@ sources:
 
 
 # ── REVISAR MANUALMENTE ───────────────────────────────────────────────────────
-# Estas fuentes aparecen como links en el HTML pero NO se monitorizan
-# automáticamente (muros de pago, JavaScript obligatorio o API de pago).
+# Aparecen como links en el HTML pero NO se monitorizan automáticamente.
 
 revisar_manualmente:
   - nombre: "Bloomberg Careers"
