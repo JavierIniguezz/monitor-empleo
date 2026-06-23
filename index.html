@@ -5,105 +5,66 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Monitor de Empleo · Javier Íñiguez</title>
   <style>
-    * { box-sizing:border-box; margin:0; padding:0 }
-    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-            background:#f1f5f9; color:#0f172a; line-height:1.5 }
-
-    /* ── Cabecera ── */
-    header.main { background:#0f172a; color:#fff; padding:24px 28px }
-    header.main h1 { font-size:19px; font-weight:800; letter-spacing:-.02em }
-    header.main p { color:#64748b; font-size:12px; margin-top:4px }
-    .stats { display:flex; gap:12px; margin-top:16px; flex-wrap:wrap }
-    .stat { background:rgba(255,255,255,.07); border-radius:8px; padding:8px 16px; text-align:center }
-    .stat b { display:block; font-size:22px; font-weight:800 }
-    .stat small { font-size:10px; color:#94a3b8; font-weight:600; text-transform:uppercase }
-
-    /* ── Grupos ── */
-    main { max-width:820px; margin:0 auto; padding:22px 16px }
-    .group { margin-bottom:28px; border-radius:10px; overflow:hidden;
-              box-shadow:0 1px 3px rgba(0,0,0,.07) }
-    .group-head { display:flex; justify-content:space-between; align-items:center;
-                   padding:11px 16px; background:#fff;
-                   border-left:4px solid; font-size:11px; font-weight:800;
-                   text-transform:uppercase; letter-spacing:.08em }
-    .badge { background:#e2e8f0; border-radius:10px; padding:2px 10px;
-              font-size:11px; font-weight:700 }
-
-    /* ── Cards ── */
-    .card { background:#fff; padding:14px 16px; border-bottom:1px solid #f1f5f9 }
-    .card:last-child { border-bottom:none }
-    .card-top { display:flex; justify-content:space-between; margin-bottom:3px }
-    .company { font-weight:700; font-size:12px }
-    .meta { font-size:11px; color:#94a3b8 }
-    .job-link { display:block; font-size:14px; font-weight:600;
-                 color:#1d4ed8; text-decoration:none; margin-bottom:4px }
-    .job-link:hover { text-decoration:underline }
-    .desc { font-size:12px; color:#64748b; line-height:1.55 }
-
-    /* ── Manual ── */
-    .manual-body { background:#fff; padding:14px 16px }
-    .manual-body p { font-size:12px; color:#64748b; margin-bottom:10px }
-    .manual-body ul { list-style:none; display:flex; flex-wrap:wrap; gap:8px }
-    .manual-body a { font-size:12px; color:#1d4ed8; background:#eff6ff;
-                      padding:5px 12px; border-radius:20px; text-decoration:none;
-                      font-weight:600 }
-    .manual-body a:hover { background:#dbeafe }
-
-    /* ── Misc ── */
-    .empty { text-align:center; padding:48px; color:#94a3b8; font-size:13px }
-    footer { text-align:center; padding:20px; color:#94a3b8; font-size:11px }
-    footer a { color:#94a3b8 }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+          background:#f1f5f9;color:#0f172a;line-height:1.5}
+    header.main{background:#0f172a;color:#fff;padding:24px 28px}
+    header.main h1{font-size:19px;font-weight:800;letter-spacing:-.02em}
+    header.main p{color:#64748b;font-size:12px;margin-top:4px}
+    .stats{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
+    .stat{background:rgba(255,255,255,.07);border-radius:8px;padding:8px 16px;text-align:center}
+    .stat b{display:block;font-size:22px;font-weight:800}
+    .stat small{font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase}
+    main{max-width:820px;margin:0 auto;padding:22px 16px}
+    .group{margin-bottom:28px;border-radius:10px;overflow:hidden;
+            box-shadow:0 1px 3px rgba(0,0,0,.07)}
+    .group-head{display:flex;justify-content:space-between;align-items:center;
+                 padding:11px 16px;background:#fff;
+                 border-left:4px solid;font-size:11px;font-weight:800;
+                 text-transform:uppercase;letter-spacing:.08em}
+    .badge{background:#e2e8f0;border-radius:10px;padding:2px 10px;
+            font-size:11px;font-weight:700}
+    .card{background:#fff;padding:14px 16px;border-bottom:1px solid #f1f5f9}
+    .card:last-child{border-bottom:none}
+    .card-top{display:flex;justify-content:space-between;margin-bottom:3px}
+    .company{font-weight:700;font-size:12px}
+    .meta{font-size:11px;color:#94a3b8}
+    .job-link{display:block;font-size:14px;font-weight:600;
+               color:#1d4ed8;text-decoration:none;margin-bottom:4px}
+    .job-link:hover{text-decoration:underline}
+    .desc{font-size:12px;color:#64748b;line-height:1.55}
+    .manual-body{background:#fff;padding:14px 16px}
+    .manual-body p{font-size:12px;color:#64748b;margin-bottom:10px}
+    .manual-body ul{list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+    .manual-body a{font-size:12px;color:#1d4ed8;background:#eff6ff;
+                    padding:5px 12px;border-radius:20px;text-decoration:none;
+                    font-weight:600}
+    .manual-body a:hover{background:#dbeafe}
+    .empty{text-align:center;padding:48px;color:#94a3b8;font-size:13px}
+    footer{text-align:center;padding:20px;color:#94a3b8;font-size:11px}
+    footer a{color:#94a3b8}
   </style>
 </head>
 <body>
-
 <header class="main">
   <h1>🌍 Monitor de Empleo · Javier Íñiguez</h1>
-  <p>Actualizado: Tuesday 23 de June de 2026 · 22:30 h</p>
+  <p>Actualizado: Tuesday 23 de June de 2026 · 22:46 h</p>
   <div class="stats">
-    <div class="stat"><b>18</b><small>Total</small></div>
-    <div class="stat"><b style="color:#60a5fa">8</b><small>Periodismo</small></div>
-    <div class="stat"><b style="color:#a78bfa">10</b><small>Comunicación</small></div>
+    <div class="stat"><b>12</b><small>Total</small></div>
+    <div class="stat"><b style="color:#60a5fa">5</b><small>Periodismo</small></div>
+    <div class="stat"><b style="color:#a78bfa">7</b><small>Comunicación</small></div>
     <div class="stat"><b style="color:#fbbf24">8</b><small>Manual</small></div>
   </div>
 </header>
-
 <main>
   
   
         <section class="group">
           <header class="group-head" style="border-color:#2563eb">
             <span>📰&nbsp; Periodismo</span>
-            <span class="badge">8</span>
+            <span class="badge">5</span>
           </header>
           
-        <article class="card">
-          <div class="card-top">
-            <span class="company">Al Jazeera</span>
-            <span class="meta">vía Al Jazeera</span>
-          </div>
-          <a href="/en/our-values/standards#page-17" target="_blank" rel="noopener" class="job-link">Editorial Standards</a>
-          
-        </article>
-
-        <article class="card">
-          <div class="card-top">
-            <span class="company">GFMD Careers</span>
-            <span class="meta">vía GFMD Careers · Tue, 23 Ju</span>
-          </div>
-          <a href="https://gfmd.info/careers/4th-annual-african-investigative-journalist-of-the-year-award/" target="_blank" rel="noopener" class="job-link">4th annual African Investigative Journalist of the Year Award</a>
-          <p class="desc">All African journalists are invited to submit entries for the prestigious 2026 African Investigative Journalist of the Year Award, an initiative of the Wits Centre for Journalism and the annual African Investigative Jour…</p>
-        </article>
-
-        <article class="card">
-          <div class="card-top">
-            <span class="company">GFMD Careers</span>
-            <span class="meta">vía GFMD Careers · Mon, 22 Ju</span>
-          </div>
-          <a href="https://gfmd.info/careers/risk-assessment-consultant-for-african-environmental-journalists/" target="_blank" rel="noopener" class="job-link">Risk Assessment Consultant for African Environmental Journalists</a>
-          <p class="desc">IPI is seeking a consultant to develop a risk assessment guide for reporters covering climate and environmental topics in Africa, along with corresponding training materials and a risk assessment workshop. This initiativ…</p>
-        </article>
-
         <article class="card">
           <div class="card-top">
             <span class="company">GFMD Careers</span>
@@ -153,7 +114,7 @@
         <section class="group">
           <header class="group-head" style="border-color:#7c3aed">
             <span>📢&nbsp; Comunicación</span>
-            <span class="badge">10</span>
+            <span class="badge">7</span>
           </header>
           
         <article class="card">
@@ -189,33 +150,6 @@
             <span class="meta">vía UNjobs – Journalism</span>
           </div>
           <a href="https://unjobs.org/vacancies/1773686247409" target="_blank" rel="noopener" class="job-link">Communication Officer, Kyiv, Ukraine</a>
-          
-        </article>
-
-        <article class="card">
-          <div class="card-top">
-            <span class="company">UNjobs – Journalism</span>
-            <span class="meta">vía UNjobs – Journalism</span>
-          </div>
-          <a href="https://unjobs.org/vacancies/1768956741924" target="_blank" rel="noopener" class="job-link">Journal Production Coordinator, Washington, United States</a>
-          
-        </article>
-
-        <article class="card">
-          <div class="card-top">
-            <span class="company">UNjobs – Journalism</span>
-            <span class="meta">vía UNjobs – Journalism</span>
-          </div>
-          <a href="https://unjobs.org/vacancies/1751793616675" target="_blank" rel="noopener" class="job-link">Copywriter (Freelancer Talent Pool), London, United Kingdom</a>
-          
-        </article>
-
-        <article class="card">
-          <div class="card-top">
-            <span class="company">UNjobs – Journalism</span>
-            <span class="meta">vía UNjobs – Journalism</span>
-          </div>
-          <a href="https://unjobs.org/vacancies/1759800178860" target="_blank" rel="noopener" class="job-link">Senior Go-To-Market & User Insights Lead, Remote, Home based</a>
           
         </article>
 
@@ -260,11 +194,9 @@
           </div>
         </section>
 </main>
-
 <footer>
-  Fuentes: Al Jazeera, GFMD Careers, UNjobs – Communications, UNjobs – Journalism ·
+  Fuentes: GFMD Careers, UNjobs – Communications, UNjobs – Journalism ·
   <a href="https://github.com/JavierIniguezz/monitor-empleo">Ver código en GitHub</a>
 </footer>
-
 </body>
 </html>
