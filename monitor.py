@@ -236,9 +236,14 @@ def fetch_all(config):
             scraper = SCRAPERS.get(source.get("type", "html"), scrape_html)
             jobs    = scraper(source, config)
 
-            # Deduplicar por ID de título
-            nuevos = [j for j in jobs if j["id"] not in seen_ids]
-            seen_ids.update(j["id"] for j in nuevos)
+            # Deduplicar por ID de título (evaluamos uno a uno para
+            # evitar que dos entradas idénticas de la misma fuente pasen
+            # el filtro simultáneamente antes de actualizar seen_ids)
+            nuevos = []
+            for j in jobs:
+                if j["id"] not in seen_ids:
+                    seen_ids.add(j["id"])
+                    nuevos.append(j)
             all_jobs.extend(nuevos)
 
             print(f"{len(nuevos)} oferta(s)")

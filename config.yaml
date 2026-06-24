@@ -87,6 +87,8 @@ exclusiones:
   - "risk assessment" # consultoría, no periodismo
 
   # Perfiles claramente irrelevantes
+  - "social editor"       # editor de redes sociales, no periodismo
+  - "content editor"      # edición de contenido de marca, no periodismo
   - "go-to-market"
   - "user insights"
   - "production coordinator"  # coordinadores de revistas académicas
